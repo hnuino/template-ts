@@ -1,21 +1,19 @@
-import { HOUR_IN_MILLISECONDS } from "./ClockController";
 import { ClockModel } from "./ClockModel";
 import {
   AbstactClockController,
   ClockSubscriber,
   EditMode,
   TIME_ZONES,
-} from "./Types";
+  timeZoneNumberToString,
+} from "./Utils";
 
 const DIGIT_EDITION_CSS_CLASS = "edition-in-progress";
 const DISPLAY_LIGHT_CSS_CLASS = "enlight";
+type DigitsType = "hours" | "minutes" | "seconds";
+type Digits = { [D in DigitsType]: HTMLElement };
 
 export class ClockView {
-  private digits: {
-    hours: HTMLElement;
-    minutes: HTMLElement;
-    seconds: HTMLElement;
-  };
+  private digits: Digits;
   private displayElement: HTMLElement;
   private modeElement: HTMLElement;
   private incrementElement: HTMLElement;
@@ -29,12 +27,12 @@ export class ClockView {
     private model: ClockModel,
     private controller: AbstactClockController
   ) {
+    this.displayElement = document.getElementById("display");
     this.digits = {
       hours: document.getElementById("hours"),
       minutes: document.getElementById("minutes"),
       seconds: document.getElementById("seconds"),
     };
-    this.displayElement = document.getElementById("display");
     this.modeElement = document.getElementById("mode-button");
     this.incrementElement = document.getElementById("increment-button");
     this.lightElement = document.getElementById("light-button");
@@ -44,9 +42,68 @@ export class ClockView {
     this.format12buttonElement = document.getElementById("format-12-button");
   }
 
-  display(): void {
-    this.addTimeZoneOptions();
+  createHtmlElements(): void {
+    const clocks = document.getElementById("clocks");
 
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("clock-wrapper");
+    clocks.appendChild(wrapper);
+
+    const container = document.createElement("div");
+    container.classList.add("clock-container");
+    wrapper.appendChild(container);
+
+    this.displayElement = document.createElement("div");
+    this.displayElement.classList.add("clock-display");
+    this.displayElement.title = "Clock display";
+    container.appendChild(this.displayElement);
+
+    ["hours", "minutes", "seconds"].forEach((digits: DigitsType) => {
+      this.digits[digits] = document.createElement("span");
+      this.digits[digits].classList.add("digits");
+      this.displayElement.appendChild(this.digits[digits]);
+      if (digits !== "seconds")
+        this.displayElement.appendChild(document.createTextNode(":"));
+    });
+    this.format12BoxElement = document.createElement("div");
+    this.format12BoxElement.classList.add("format-12-box");
+    this.displayElement.appendChild(this.format12BoxElement);
+
+    this.resetElement = document.createElement("div");
+    this.resetElement.classList.add("button", "top-left");
+    container.appendChild(this.resetElement);
+
+    this.modeElement = document.createElement("div");
+    this.modeElement.classList.add("button", "top-right");
+    container.appendChild(this.modeElement);
+
+    this.lightElement = document.createElement("div");
+    this.lightElement.classList.add("button", "bottom-left");
+    container.appendChild(this.lightElement);
+
+    this.incrementElement = document.createElement("div");
+    this.incrementElement.classList.add("button", "bottom-right");
+    container.appendChild(this.incrementElement);
+
+    this.incrementElement = document.createElement("div");
+    this.incrementElement.classList.add("button", "bottom-right");
+    container.appendChild(this.incrementElement);
+
+    const buttomZone = document.createElement("div");
+    buttomZone.classList.add("bottom-zone");
+    container.append(buttomZone);
+
+    this.timezoneElement = document.createElement("select");
+    buttomZone.appendChild(this.timezoneElement);
+
+    this.format12buttonElement = document.createElement("div");
+    this.format12buttonElement.classList.add("format-button");
+    this.format12buttonElement.textContent = "Change Format";
+    buttomZone.appendChild(this.format12buttonElement);
+    this.addTimeZoneOptions();
+  }
+
+  display(): void {
     this.model.subscribe(this.updateTime);
     this.model.subscribe(this.updateFormat12Box);
     this.model.subscribe(this.updateEditionAnimation);
@@ -59,7 +116,7 @@ export class ClockView {
     this.format12buttonElement.onclick = this.controller.switchFormat24;
     this.timezoneElement.onchange = () =>
       this.controller.changeTimeZone(
-        (this.timezoneElement as HTMLSelectElement).value
+        Number((this.timezoneElement as HTMLSelectElement).value)
       );
   }
 
@@ -126,25 +183,20 @@ export class ClockView {
   };
 
   private addTimeZoneOptions = (): void => {
-    const userTimeZone = this.getUsersGMTOffset();
-    const userTimeZoneExists =
-      TIME_ZONES.find((v) => v === userTimeZone) !== undefined;
-
-    (userTimeZoneExists ? TIME_ZONES : [...TIME_ZONES, userTimeZone])
-      .sort((a, b) => a - b)
-      .forEach((n) => {
-        const option = document.createElement("option");
-        option.value = option.text = n < 0 ? `Etc/GMT${n}` : `Etc/GMT+${n}`;
-        this.timezoneElement.appendChild(option);
-        if (n === userTimeZone) option.selected = true;
-      });
+    TIME_ZONES.sort((a, b) => a - b).forEach((n) => {
+      const option = document.createElement("option");
+      option.text = timeZoneNumberToString(n);
+      option.value = n.toString();
+      this.timezoneElement.appendChild(option);
+      if (n === this.model.timeZone) option.selected = true;
+    });
   };
 
   private getCurrentDigits(digits: "hour" | "minute" | "second"): string {
     const current = new Date(this.model.date.getTime() + this.model.dateOffset);
     return current
       .toLocaleString("en-US", {
-        timeZone: this.model.timeZone,
+        timeZone: timeZoneNumberToString(this.model.timeZone),
         [digits]: "2-digit",
         formatMatcher: "best fit",
         hour12: this.model.format12,
@@ -157,7 +209,7 @@ export class ClockView {
     const current = new Date(this.model.date.getTime() + this.model.dateOffset);
     this.format12BoxElement.textContent = current
       .toLocaleString("en-US", {
-        timeZone: this.model.timeZone,
+        timeZone: timeZoneNumberToString(this.model.timeZone),
         hour: "2-digit",
         formatMatcher: "best fit",
         hour12: this.model.format12,

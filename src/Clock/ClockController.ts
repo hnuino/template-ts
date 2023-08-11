@@ -1,5 +1,5 @@
 import { ClockModel } from "./ClockModel";
-import { AbstactClockController, EditMode } from "./Types";
+import { AbstactClockController, EditMode } from "./Utils";
 
 export const MINUTE_IN_MILLISECONDS: number = 60 * 1000;
 export const HOUR_IN_MILLISECONDS: number = 60 * MINUTE_IN_MILLISECONDS;
@@ -40,7 +40,7 @@ export class ClockController implements AbstactClockController {
     this.model.lightOn = false;
   };
 
-  changeTimeZone = (timeZone: string): void => {
+  changeTimeZone = (timeZone: number): void => {
     this.model.timeZone = timeZone;
   };
 }

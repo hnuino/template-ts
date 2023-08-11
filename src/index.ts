@@ -1,10 +1,22 @@
-import { ClockController, ClockModel, ClockView, EditMode } from "./Clock";
+import {
+  TIME_ZONES,
+  createThenInitClick,
+  timeZoneNumberToString,
+} from "./Clock";
 import "./index.css";
 
-const model = new ClockModel();
-const controller = new ClockController(model);
-const view = new ClockView(model, controller);
+const createClockButton = document.getElementById("create-clock-button");
+const timeZoneSelection = document.getElementById(
+  "create-clock-selection"
+) as HTMLSelectElement;
 
-view.display();
+TIME_ZONES.sort((a, b) => a - b).forEach((n) => {
+  const option = document.createElement("option");
+  option.text = timeZoneNumberToString(n);
+  option.value = n.toString();
+  timeZoneSelection.appendChild(option);
+});
 
-setInterval(controller.updateClock, 1000);
+createClockButton.onclick = () => {
+  createThenInitClick(Number(timeZoneSelection.value));
+};

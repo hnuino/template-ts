@@ -1,16 +1,15 @@
-import { ClockSubscriber, EditMode } from "./Types";
+import { ClockSubscriber, EditMode } from "./Utils";
 
 export class ClockModel {
   private subscribers: ClockSubscriber[] = [];
 
-  private _timeZone: string = "GMT";
   private _date: Date = new Date();
   private _dateOffset: number = 0;
   private _editMode: EditMode = EditMode.NA;
   private _lightOn: boolean = false;
-  private _format12: boolean = true;
+  private _format12: boolean = false;
 
-  constructor() {}
+  constructor(private _timeZone: number = 0) {}
 
   get dateOffset() {
     return this._dateOffset;
@@ -61,7 +60,7 @@ export class ClockModel {
     return this._timeZone;
   }
 
-  set timeZone(value: string) {
+  set timeZone(value: number) {
     this._timeZone = value;
     this.notifySubscribers();
   }
