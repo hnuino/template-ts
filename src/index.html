@@ -7,29 +7,10 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="clock-wrapper">
-      <div class="clock-container">
-        <div class="clock-display" id="display" title="Clock display">
-          <span class="digits" id="hours">##</span>:<span
-            id="minutes"
-            class="digits"
-            >##</span
-          >:<span id="seconds" class="digits">##</span>
-          <div id="format-12-box"></div>
-        </div>
-        <div class="button top-left" id="reset-button" title="Reset"></div>
-        <div class="button top-right" id="mode-button" title="Mode"></div>
-        <div class="button bottom-left" id="light-button" title="Light"></div>
-        <div
-          class="button bottom-right"
-          id="increment-button"
-          title="Increase"
-        ></div>
-        <div class="bottom-zone" title="Timezone">
-          <select id="timezone-select"></select>
-          <div id="format-12-button" class="format-button">Change Format</div>
-        </div>
-      </div>
+    <div id="clocks"></div>
+    <div class="footer">
+      <select id="create-clock-selection"></select>
+      <button id="create-clock-button">Create A New Clock</button>
     </div>
   </body>
 </html>
