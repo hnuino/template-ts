@@ -1,5 +1,10 @@
-import './index.css';
-import { MyClass } from './example-unit';
+import { ClockController, ClockModel, ClockView, EditMode } from "./Clock";
+import "./index.css";
 
-const a = new MyClass(2);
-console.log('number is', a.get());
+const model = new ClockModel();
+const controller = new ClockController(model);
+const view = new ClockView(model, controller);
+
+view.display();
+
+setInterval(controller.updateClock, 1000);
